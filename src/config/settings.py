@@ -58,6 +58,21 @@ class Settings(BaseSettings):
     VECTORSTORE_TYPE: Literal["chroma", "milvus"] = Field(default="chroma")
     CHROMA_COLLECTION_NAME: str = Field(default="automotive_docs")
 
+    # Knowledge graph (Neo4j property graph + OWL/RDF export)
+    NEO4J_URI: str = Field(default="bolt://localhost:7687")
+    NEO4J_USER: str = Field(default="neo4j")
+    NEO4J_PASSWORD: str = Field(default="rag10q-dev-password")
+    NEO4J_DATABASE: str = Field(default="neo4j")
+    # Host ports used by docker-compose (Windows may reserve the defaults 7474/7687)
+    NEO4J_HTTP_PORT: int = Field(default=7474)
+    NEO4J_BOLT_PORT: int = Field(default=7687)
+    KG_OUTPUT_DIR: Path = Field(
+        default_factory=lambda: Path(__file__).parent.parent.parent / "data" / "knowledge_graph"
+    )
+    ONTOLOGY_PATH: Path = Field(
+        default_factory=lambda: Path(__file__).parent.parent.parent / "ontology" / "automotive.ttl"
+    )
+
     # API
     API_HOST: str = Field(default="0.0.0.0")
     API_PORT: int = Field(default=8000, ge=1024, le=65535)

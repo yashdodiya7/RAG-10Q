@@ -1,0 +1,15 @@
+# What does each warning indicator signal, and where is it documented?
+PREFIX auto: <https://w3id.org/rag10q/auto#>
+
+SELECT ?warning ?signals ?brand ?section ?page
+WHERE {
+  ?w a auto:WarningIndicator ;
+     auto:name ?warning .
+  OPTIONAL { ?w auto:indicates ?target . ?target auto:name ?signals . }
+  ?passage auto:mentions ?w ;
+           auto:brand ?brand ;
+           auto:pageStart ?page .
+  ?sec auto:hasPassage ?passage ;
+       auto:title ?section .
+}
+ORDER BY ?warning ?brand ?page
