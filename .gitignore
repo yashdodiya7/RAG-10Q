@@ -19,6 +19,11 @@ dist/
 .vscode/
 .idea/
 notebooks/.ipynb_checkpoints/
-data/
+# Raw/parsed documents and generated graphs stay local (copyrighted manuals, large files).
+# Only the hand-written evaluation question sets are versioned.
+/data/*
+!/data/eval/
+/data/eval/*
+!/data/eval/*_questions.json
 chroma_10q_db/
 *.sqlite3
