@@ -62,7 +62,7 @@ class GraphRetriever(BaseRetriever):
 
 
 def build_graph_tools(store: Neo4jStore) -> list:
-    """LangChain tools for an agent (also reused by the MCP server)."""
+    """LangChain tools for an agent: passage search and concept lookup."""
 
     @tool
     def search_manuals(query: str, brand: Optional[str] = None) -> str:
