@@ -30,13 +30,21 @@ class Settings(BaseSettings):
 
     # PDF Configuration
     PDF_PATH: Path = Field(default_factory=lambda: Path(__file__).parent.parent.parent / "data" / "10q.pdf")
+    AUTOMOTIVE_INPUT_DIR: Path = Field(
+        default_factory=lambda: Path(__file__).parent.parent.parent / "data" / "automotive_corpus" / "incoming_pdfs"
+    )
+    AUTOMOTIVE_PARSED_DIR: Path = Field(
+        default_factory=lambda: Path(__file__).parent.parent.parent / "data" / "automotive_corpus" / "parsed"
+    )
+    MINERU_OUTPUT_FORMAT: Literal["md", "markdown", "json"] = Field(default="markdown")
+    MINERU_BACKEND: Literal["pipeline", "auto"] = Field(default="pipeline")
     CHUNK_SIZE: int = Field(default=500, ge=100, le=2000)
     CHUNK_OVERLAP: int = Field(default=100, ge=0, le=500)
 
     # LLM Configuration
     PRIMARY_LLM: Literal["gemini", "ollama"] = Field(default="gemini")
     GEMINI_API_KEY: Optional[str] = Field(default=None)
-    GEMINI_MODEL: str = Field(default="gemini-1.5-pro")
+    GEMINI_MODEL: str = Field(default="gemini-3.5-flash-lite")
     
     # Fallback LLM
     OLLAMA_BASE_URL: str = Field(default="http://localhost:11434")
@@ -75,6 +83,8 @@ class Settings(BaseSettings):
         """Ensure required directories exist."""
         self.DATA_DIR.mkdir(parents=True, exist_ok=True)
         self.CHROMA_DB_DIR.mkdir(parents=True, exist_ok=True)
+        self.AUTOMOTIVE_INPUT_DIR.mkdir(parents=True, exist_ok=True)
+        self.AUTOMOTIVE_PARSED_DIR.mkdir(parents=True, exist_ok=True)
         if self.AUTOMOTIVE_CORPUS_PATH:
             self.AUTOMOTIVE_CORPUS_PATH.mkdir(parents=True, exist_ok=True)
 
