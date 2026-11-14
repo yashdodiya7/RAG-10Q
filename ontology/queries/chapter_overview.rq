@@ -1,0 +1,16 @@
+# Chapters of a manual with their number of sections and passages.
+# Usage: python scripts/query_knowledge_graph.py sparql ontology/queries/chapter_overview.rq --brand BMW
+PREFIX auto: <https://w3id.org/rag10q/auto#>
+
+SELECT ?chapter ?page (COUNT(DISTINCT ?section) AS ?sections) (COUNT(DISTINCT ?passage) AS ?passages)
+WHERE {
+  ?doc a auto:Document ;
+       auto:brand "$brand" ;
+       auto:hasChapter ?ch .
+  ?ch auto:title ?chapter ;
+      auto:pageStart ?page ;
+      auto:hasSection ?section .
+  ?section auto:hasPassage ?passage .
+}
+GROUP BY ?chapter ?page
+ORDER BY ?page

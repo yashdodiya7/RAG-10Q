@@ -1,0 +1,148 @@
+@prefix auto: <https://w3id.org/rag10q/auto#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# RAG-10Q Automotive Ontology
+# Schema contract for the knowledge graph. Neo4j labels / relationship types
+# and the RDF export both follow this file (see src/graph/ontology.py).
+# ---------------------------------------------------------------------------
+
+<https://w3id.org/rag10q/auto> a owl:Ontology ;
+    rdfs:label "RAG-10Q Automotive Ontology" ;
+    rdfs:comment "Document structure and vehicle domain concepts extracted from owner manuals." ;
+    owl:versionInfo "0.1.0" .
+
+# ---------------------------------------------------------------------------
+# Document structure classes
+# ---------------------------------------------------------------------------
+
+auto:StructuralElement a owl:Class ;
+    rdfs:label "Structural element" ;
+    rdfs:comment "A part of a source document." .
+
+auto:Document a owl:Class ;
+    rdfs:subClassOf auto:StructuralElement ;
+    rdfs:label "Document" ;
+    rdfs:comment "A source document, e.g. an owner's manual." .
+
+auto:Chapter a owl:Class ;
+    rdfs:subClassOf auto:StructuralElement ;
+    rdfs:label "Chapter" .
+
+auto:Section a owl:Class ;
+    rdfs:subClassOf auto:StructuralElement ;
+    rdfs:label "Section" .
+
+auto:Passage a owl:Class ;
+    rdfs:subClassOf auto:StructuralElement ;
+    rdfs:label "Passage" ;
+    rdfs:comment "A retrievable block of body text under a section." .
+
+# ---------------------------------------------------------------------------
+# Domain classes
+# ---------------------------------------------------------------------------
+
+auto:DomainConcept a owl:Class ;
+    rdfs:label "Domain concept" ;
+    rdfs:comment "A vehicle-domain entity mentioned in documents." .
+
+auto:VehicleSystem a owl:Class ;
+    rdfs:subClassOf auto:DomainConcept ;
+    rdfs:label "Vehicle system" ;
+    rdfs:comment "A functional system, e.g. brakes, transmission, climate control." .
+
+auto:Component a owl:Class ;
+    rdfs:subClassOf auto:DomainConcept ;
+    rdfs:label "Component" ;
+    rdfs:comment "A physical part, e.g. tire, battery, brake pad." .
+
+auto:Feature a owl:Class ;
+    rdfs:subClassOf auto:DomainConcept ;
+    rdfs:label "Feature" ;
+    rdfs:comment "A driver-facing function, e.g. Auto Hold, cruise control." .
+
+auto:WarningIndicator a owl:Class ;
+    rdfs:subClassOf auto:DomainConcept ;
+    rdfs:label "Warning indicator" ;
+    rdfs:comment "A warning lamp, symbol or check-control message." .
+
+auto:Procedure a owl:Class ;
+    rdfs:subClassOf auto:DomainConcept ;
+    rdfs:label "Procedure" ;
+    rdfs:comment "A sequence of steps the driver performs." .
+
+auto:MaintenanceTask a owl:Class ;
+    rdfs:subClassOf auto:Procedure ;
+    rdfs:label "Maintenance task" .
+
+auto:SafetyInstruction a owl:Class ;
+    rdfs:subClassOf auto:DomainConcept ;
+    rdfs:label "Safety instruction" .
+
+auto:Specification a owl:Class ;
+    rdfs:subClassOf auto:DomainConcept ;
+    rdfs:label "Specification" ;
+    rdfs:comment "A technical value, e.g. tire pressure or fluid capacity." .
+
+auto:StructuralElement owl:disjointWith auto:DomainConcept .
+
+# ---------------------------------------------------------------------------
+# Object properties
+# ---------------------------------------------------------------------------
+
+auto:hasChapter a owl:ObjectProperty ;
+    rdfs:domain auto:Document ;
+    rdfs:range auto:Chapter .
+
+auto:hasSection a owl:ObjectProperty ;
+    rdfs:domain auto:Chapter ;
+    rdfs:range auto:Section .
+
+auto:hasPassage a owl:ObjectProperty ;
+    rdfs:domain auto:Section ;
+    rdfs:range auto:Passage .
+
+auto:nextPassage a owl:ObjectProperty ;
+    rdfs:domain auto:Passage ;
+    rdfs:range auto:Passage ;
+    rdfs:comment "Reading order between passages." .
+
+auto:mentions a owl:ObjectProperty ;
+    rdfs:domain auto:Passage ;
+    rdfs:range auto:DomainConcept ;
+    rdfs:comment "Provenance: the passage in which a concept was found." .
+
+auto:partOf a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:domain auto:DomainConcept ;
+    rdfs:range auto:DomainConcept .
+
+auto:indicates a owl:ObjectProperty ;
+    rdfs:domain auto:WarningIndicator ;
+    rdfs:range auto:DomainConcept .
+
+auto:appliesTo a owl:ObjectProperty ;
+    rdfs:domain auto:DomainConcept ;
+    rdfs:range auto:DomainConcept ;
+    rdfs:comment "A procedure, instruction or specification that concerns a system, component or feature." .
+
+auto:relatedTo a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:domain auto:DomainConcept ;
+    rdfs:range auto:DomainConcept .
+
+# ---------------------------------------------------------------------------
+# Datatype properties
+# ---------------------------------------------------------------------------
+
+auto:name a owl:DatatypeProperty ; rdfs:range xsd:string .
+auto:title a owl:DatatypeProperty ; rdfs:range xsd:string .
+auto:text a owl:DatatypeProperty ; rdfs:range xsd:string .
+auto:description a owl:DatatypeProperty ; rdfs:range xsd:string .
+auto:brand a owl:DatatypeProperty ; rdfs:range xsd:string .
+auto:sourceFile a owl:DatatypeProperty ; rdfs:range xsd:string .
+auto:documentType a owl:DatatypeProperty ; rdfs:range xsd:string .
+auto:pageStart a owl:DatatypeProperty ; rdfs:range xsd:integer .
+auto:pageEnd a owl:DatatypeProperty ; rdfs:range xsd:integer .
+auto:order a owl:DatatypeProperty ; rdfs:range xsd:integer .

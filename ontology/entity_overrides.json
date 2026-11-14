@@ -1,0 +1,10 @@
+{
+ "_comment": "Human decisions for entity resolution (lowercase entity names). They win over the rules and the LLM judge. Review data/knowledge_graph/<brand>_entity_merges.json after each run and add pairs here.",
+ "never_merge": [
+  ["flat tire monitor", "tire pressure monitor"],
+  ["setting appointment date", "setting the date"]
+ ],
+ "always_merge": [
+  ["initializing flat tire monitor", "reinitialize flat tire monitor"]
+ ]
+}

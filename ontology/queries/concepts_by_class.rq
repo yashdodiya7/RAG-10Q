@@ -1,0 +1,13 @@
+# Domain concepts grouped by ontology class, using the OWL class hierarchy:
+# rdfs:subClassOf* also counts MaintenanceTask under Procedure.
+PREFIX auto: <https://w3id.org/rag10q/auto#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?class (COUNT(DISTINCT ?concept) AS ?concepts)
+WHERE {
+  ?class rdfs:subClassOf auto:DomainConcept .
+  ?type rdfs:subClassOf* ?class .
+  ?concept a ?type .
+}
+GROUP BY ?class
+ORDER BY DESC(?concepts)
