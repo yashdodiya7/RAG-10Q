@@ -224,6 +224,47 @@ def format_docs_with_citations(docs: List[Document]) -> str:
     return "\n\n".join(f"[{i}] ({d.metadata.get('citation', 'unknown source')})\n{d.page_content}" for i, d in enumerate(docs, 1))
 
 
+def make_graph_rag_retriever(
+    store: Neo4jStore, brand: Optional[str] = None, settings=None, pool_k: int = 20, max_docs: int = 10
+) -> "GraphRAGRetriever":
+    """The best-performing setup from the benchmark (graph-rrf), ready to use.
+
+    Uses the Chroma collection ``<brand>_passages``; builds it from
+    ``<brand>_kg.json`` on first use. Without a brand, the BMW index is used
+    (the only manual loaded so far) and no brand filter is applied.
+    """
+    import json
+
+    from src.graph.schemas import slugify
+
+    if settings is None:
+        from src.config import get_settings
+
+        settings = get_settings()
+    key = slugify(brand or "BMW")
+    kg_path = settings.KG_OUTPUT_DIR / f"{key}_kg.json"
+
+    from langchain_chroma import Chroma
+
+    from src.rag.embeddings import EmbeddingsFactory
+
+    embeddings = EmbeddingsFactory.get_default_embeddings()
+    index = Chroma(collection_name=f"{key}_passages", embedding_function=embeddings,
+                   persist_directory=str(settings.CHROMA_DB_DIR))
+    if index._collection.count() == 0:
+        if not kg_path.exists():
+            raise FileNotFoundError(f"{kg_path} not found - run scripts/build_knowledge_graph.py first")
+        kg = KnowledgeGraph.from_dict(json.loads(kg_path.read_text(encoding="utf-8")))
+        index = build_passage_index(kg, settings.CHROMA_DB_DIR, f"{key}_passages")
+    return GraphRAGRetriever(
+        seed_retriever=make_vector_retriever(index, pool_k, brand),
+        store=store,
+        embeddings=embeddings,
+        brand=brand,
+        max_docs=max_docs,
+    )
+
+
 def make_vector_retriever(store, k: int, brand: Optional[str] = None):
     kwargs: Dict[str, Any] = {"k": k}
     if brand:

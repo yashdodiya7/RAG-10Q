@@ -95,6 +95,33 @@ What the numbers say:
 - **Fusing the rankings did help.** Graph signals act as a vote alongside vector search instead of replacing it. The fused setup was never worse than vector top 10 on any question; its gain comes from linking question words to concept names (for example *"external temperature warning"*, which vector search ranked outside its top 20).
 - **The sample is small.** The difference to vector top 10 is one question, and I wrote the questions myself. A larger set with real user questions is the next step.
 
+## Agent
+
+[`src/agents/graph_agent.py`](src/agents/graph_agent.py) is a tool-calling agent (LangChain
+`create_agent`, Gemini at temperature 0) with two tools:
+
+- `search_manual`: the rank-fusion GraphRAG retriever; returns excerpts with chapter, section and page.
+- `explore_concept`: a concept's relations in the graph and every section and page that mentions it.
+
+The agent splits multi-part questions into several searches and, when results miss, searches
+again in the manual's terminology. That fixes a question no retriever answered in the benchmark:
+
+```text
+$ python scripts/ask_agent.py "I just got new tires fitted at the shop. Is there anything I need to do in the car?" --brand BMW --trace
+=== Tool calls ===
+1. search_manual(query='new tires fitted') -> Wheels and tires > Recommendation, p. 227
+2. search_manual(query='initialize Flat Tire Monitor reset TPM after changing tires') -> Wheels and tires > Checking the pressure, p. 224
+=== Answer ===
+Yes, after every tire or wheel change, you need to reset or reinitialize your tire pressure monitoring
+system (Flat Tire Monitor or Tire Pressure Monitor) so that it updates its reference values and can
+accurately warn you of any pressure loss (Displays > Resetting the system, p. 96, Displays >
+Initialization, pp. 98-99).
+...
+```
+
+Answers cite chapter, section and page, put safety warnings first, and say so when the manual does not
+contain the answer. Tests run the full agent loop with a scripted fake model, so no API key is needed.
+
 ## Quick start
 
 ```bash
@@ -118,7 +145,10 @@ python scripts/query_knowledge_graph.py search "tire pressure" --brand BMW
 python scripts/query_knowledge_graph.py concept "tire pressure monitor"
 python scripts/query_knowledge_graph.py sparql ontology/queries/concepts_by_class.rq
 
-# 5. Benchmark retrieval
+# 5. Ask the agent (shows its tool calls)
+python scripts/ask_agent.py "My tyre light came on, what should I do?" --brand BMW --trace
+
+# 6. Benchmark retrieval
 python scripts/compare_retrievers.py --brand BMW
 
 # Tests (no Neo4j or LLM needed)
@@ -143,7 +173,7 @@ src/
                             Neo4j store, RDF store, GraphRAG retriever and agent tools
   data/                     MinerU parsing and document loading
   rag/                      embeddings and Chroma vector store
-  agents/                   LLM factory and RAG chain
+  agents/                   knowledge-graph agent (graph_agent.py), LLM factory, RAG chain
   api/                      FastAPI app (POST /api/v1/chat, GET /health)
   eval/                     RAGAS evaluation helpers
 scripts/                    build, query and benchmark CLIs
@@ -173,4 +203,4 @@ Next steps, in order:
 2. Heading paths in the structure layer and in passage embeddings; rarity-weighted concepts instead of a fixed cut-off.
 3. Neo4j as the single retrieval engine: native vector index and one Cypher query per question.
 4. Concept extraction for the whole manual, then further manuals for cross-brand questions.
-5. Cross-encoder reranking, then an agent step that rewrites multi-part questions only when needed.
+5. Cross-encoder reranking; an answer-level benchmark for the agent (correctness and citation accuracy, not only retrieval).

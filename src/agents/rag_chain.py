@@ -1,5 +1,7 @@
 """
-Multi-agent RAG orchestration using LangGraph.
+Single-step RAG chain (retrieve -> prompt -> LLM).
+
+For the tool-calling agent over the knowledge graph see src/agents/graph_agent.py.
 """
 
 from typing import Optional, List
@@ -108,25 +110,3 @@ Answer:""",
                 yield chunk.content
             else:
                 yield str(chunk)
-
-
-class MultiAgentRAG:
-    """Multi-agent RAG system with specialized agents."""
-
-    def __init__(self):
-        """Initialize multi-agent system."""
-        self.settings = get_settings()
-        self.llm = LLMFactory.get_primary_llm()
-        # TO BE IMPLEMENTED: LangGraph state machine + agent graph
-
-    def route_query(self, question: str) -> str:
-        """
-        Route query to appropriate agent.
-        Agents:
-        - Retrieval Agent: Fetch relevant documents
-        - Rerank Agent: Filter by relevance
-        - Synthesis Agent: Generate answer
-        - Citation Agent: Verify sources
-        """
-        # TODO: LangGraph routing logic
-        pass

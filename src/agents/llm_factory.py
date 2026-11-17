@@ -13,25 +13,26 @@ class LLMFactory:
     """Factory for creating LLM instances."""
 
     @staticmethod
-    def get_llm(model: str = "gemini") -> BaseLanguageModel:
+    def get_llm(model: str = "gemini", temperature: float = 0.7) -> BaseLanguageModel:
         """
         Get language model.
-        
+
         Args:
             model: Model type ('gemini' or 'ollama').
-            
+            temperature: Sampling temperature (Gemini). Use 0 for agents and extraction.
+
         Returns:
             Language model instance.
         """
         settings = get_settings()
-        
+
         if model == "gemini":
             if not settings.GEMINI_API_KEY:
                 raise ValueError("GEMINI_API_KEY not set")
             return ChatGoogleGenerativeAI(
                 model=settings.GEMINI_MODEL,
                 google_api_key=settings.GEMINI_API_KEY,
-                temperature=0.7,
+                temperature=temperature,
             )
         elif model == "ollama":
             return OllamaLLM(
